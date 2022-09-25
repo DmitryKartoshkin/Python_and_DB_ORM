@@ -5,7 +5,16 @@ import json
 
 from Models1 import create_tables, Publisher, Book, Shop, Stock, Sale
 
-DSN = 'postgresql://postgres:dima1983@localhost:5432/homework'
+dialect = 'postgresql'  # это имя базы данных(mysql, postgresql, mssql, oracle и так далее).
+driver = ''             # используемый DBAPI. Этот параметр является необязательным. Если его
+                        # не указать будет использоваться драйвер по умолчанию(если он установлен).
+username = 'postgres'
+password = 'dima1983'   # данные для получения доступа к базе данных.
+host = 'localhost'      # расположение сервера базы данных.
+port = '5432'           # порт для подключения.
+database = 'homework'   # название базы данных.
+
+DSN = f'{dialect+driver}://{username}:{password}@{host}:{port}/{database}'
 engine = sqlalchemy.create_engine(DSN)
 
 create_tables(engine)
@@ -17,7 +26,6 @@ with open("tests_data.json", encoding="utf-8") as f:
     json_data = json.load(f)
 
 for i in json_data:
-    # print(i['model'])
     if i['model'] == 'publisher':
         publisher = Publisher(id = i['pk'], title=i['fields']['name'])
         session.add(publisher)
@@ -47,5 +55,11 @@ for i in json_data:
         id_stock = i['fields']['id_stock'])
         session.add(sale)
         session.commit()
+
+number_id_publisher = int(input('Введите ID: '))
+s = session.query(Shop).join(Stock).join(Book).join(Publisher).\
+    filter(Publisher.id == number_id_publisher).all()
+print(*s)
+
 
 session.close
